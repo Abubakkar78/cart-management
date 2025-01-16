@@ -1,0 +1,188 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-roboto bg-gray-100">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [loggedInUser, setLoggedInUser] = useState(null);
+            const [users, setUsers] = useState([]);
+            const [cartItems, setCartItems] = useState([]);
+
+            const handleSignIn = (email, password) => {
+                const foundUser = users.find((user) => user.email === email && user.password === password);
+                if (foundUser) {
+                    setLoggedInUser(foundUser.email);
+                } else {
+                    alert('Invalid credentials');
+                }
+            };
+
+            const handleSignUp = (email, password) => {
+                const newUser = { email, password };
+                setUsers([...users, newUser]);
+                alert(`User ${email} has been created!`);
+            };
+
+            const addToCart = (product) => {
+                setCartItems([...cartItems, product]);
+            };
+
+            const removeFromCart = (productId) => {
+                const updatedCart = cartItems.filter((item) => item.id !== productId);
+                setCartItems(updatedCart);
+            };
+
+            return (
+                <div className="App p-4">
+                    <h1 className="text-2xl font-bold mb-4">E-commerce App</h1>
+                    {loggedInUser ? (
+                        <div>
+                            <p className="mb-4">Welcome, {loggedInUser}!</p>
+                            <div className="flex flex-col md:flex-row">
+                                <ProductList addToCart={addToCart} />
+                                <Cart cartItems={cartItems} removeFromCart={removeFromCart} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col md:flex-row">
+                            <SignIn handleSignIn={handleSignIn} />
+                            <SignUp handleSignUp={handleSignUp} />
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function SignIn({ handleSignIn }) {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                handleSignIn(email, password);
+            };
+
+            return (
+                <div className="w-full md:w-1/2 p-4">
+                    <h2 className="text-xl font-bold mb-4">Sign In</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                        <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">Sign In</button>
+                    </form>
+                </div>
+            );
+        }
+
+        function SignUp({ handleSignUp }) {
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                handleSignUp(email, password);
+            };
+
+            return (
+                <div className="w-full md:w-1/2 p-4">
+                    <h2 className="text-xl font-bold mb-4">Sign Up</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                        <button type="submit" className="w-full p-2 bg-green-500 text-white rounded">Sign Up</button>
+                    </form>
+                </div>
+            );
+        }
+
+        function ProductList({ addToCart }) {
+            const productData = [
+                { id: 1, name: 'Product 1', price: 20 },
+                { id: 2, name: 'Product 2', price: 30 },
+                { id: 3, name: 'Product 3', price: 25 },
+            ];
+
+            return (
+                <div className="w-full md:w-1/2 p-4">
+                    <h2 className="text-xl font-bold mb-4">Products</h2>
+                    <ul className="space-y-4">
+                        {productData.map((product) => (
+                            <ProductItem key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        function ProductItem({ product, addToCart }) {
+            const { id, name, price } = product;
+
+            const handleAddToCart = () => {
+                addToCart(product);
+            };
+
+            return (
+                <li key={id} className="p-4 border border-gray-300 rounded">
+                    <h3 className="text-lg font-bold">{name}</h3>
+                    <p className="mb-2">Price: ${price}</p>
+                    <button onClick={handleAddToCart} className="p-2 bg-yellow-500 text-white rounded">Add to Cart</button>
+                </li>
+            );
+        }
+
+        function Cart({ cartItems, removeFromCart }) {
+            return (
+                <div className="w-full md:w-1/2 p-4">
+                    <h2 className="text-xl font-bold mb-4">Shopping Cart</h2>
+                    <ul className="space-y-4">
+                        {cartItems.map((item) => (
+                            <li key={item.id} className="p-4 border border-gray-300 rounded">
+                                {item.name} - ${item.price}
+                                <button onClick={() => removeFromCart(item.id)} className="ml-4 p-2 bg-red-500 text-white rounded">Remove</button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</body>
+</html>
